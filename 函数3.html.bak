@@ -1,0 +1,21 @@
+<h1 
+  onclick="copyText(this)"
+  style="cursor:pointer; color:blue;">
+  孙孤生生日快乐
+</h1>
+
+<script>
+function copyText(element) {
+  navigator.clipboard.writeText(element.innerText)
+    .then(() => {
+      const originalColor = element.style.color;
+      element.style.color = 'green';
+      element.innerText = '✓ 已复制：孙孤生生日快乐';
+      
+      setTimeout(() => {
+        element.style.color = originalColor;
+        element.innerText = '孙孤生生日快乐';
+      }, 1000);
+    });
+}
+</script>

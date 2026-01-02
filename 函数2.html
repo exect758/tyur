@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>密码生成器</title>
+</head>
+<body>
+    <h2>生成新密码代码</h2>
+    <div>
+        <label>新密码：</label>
+        <input type="password" id="newPassword">
+    </div>
+    <button onclick="generateCode()">生成代码</button>
+    
+    <div id="result" style="display:none; margin-top:20px; padding:10px; background:#f0f0f0;">
+        <h3>复制以下代码到你的HTML文件中：</h3>
+        <pre id="newCode"></pre>
+        <button onclick="copyCode()">复制代码</button>
+    </div>
+    
+    <script>
+    async function sha256(message) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    
+    async function generateCode() {
+        const newPassword = document.getElementById('newPassword').value;
+        if (!newPassword) {
+            alert("请输入新密码");
+            return;
+        }
+        
+        const newHash = await sha256(newPassword);
+        const newCode = `<script>
+const storedHash = "${newHash}";
+
+async function checkPassword() {
+    const input = prompt("请输入密码：");
+    if (!input) {
+        document.body.innerHTML = "<h1>访问被取消</h1>";
+        return;
+    }
+    
+    const encoder = new TextEncoder();
+    const data = encoder.encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    if (inputHash !== storedHash) {
+        document.body.innerHTML = "<h1>密码错误</h1>";
+    }
+}
+
+checkPassword();
+<\/script>`;
+        
+        document.getElementById('newCode').textContent = newCode;
+        document.getElementById('result').style.display = 'block';
+    }
+    
+    function copyCode() {
+        const code = document.getElementById('newCode').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            alert("代码已复制！");
+        });
+    }
+    </script>
+</body>
+</html>
